@@ -1,16 +1,19 @@
 import { galleryItems } from './gallery-items.js';
+
 // Change code below this line
 
 // console.log(galleryItems);
 const listEl = document.querySelector('.gallery');
+
 const markup = createGalaryItems(galleryItems);
+
 listEl.insertAdjacentHTML('beforeend', markup);
 
 function createGalaryItems(galleryItems) {
   return galleryItems
     .map(({ preview, original, description }) => {
       return `<div class="gallery__item">
-  <a class="gallery__link" href="${original}" target = "_self">
+  <a class="gallery__link" href="${original}">
     <img
       class="gallery__image"
       src="${preview}"
@@ -23,11 +26,37 @@ function createGalaryItems(galleryItems) {
     .join('');
 }
 
-listEl.addEventListener('click', onGalleryImage);
+listEl.addEventListener('click', showModal);
 
-function onGalleryImage(event) {
+function showModal(event) {
+  event.preventDefault();
   if (event.target.nodeName !== 'IMG') {
     return;
   }
-  console.log(event.target.getAttribute('data-source'));
+
+  const instance = basicLightbox.create(
+    `<div class="modal">
+    <img
+    class="modal__image"
+    src="${event.target.dataset.source}"
+    />
+  </div>`,
+    {
+      onShow: (instance) => {
+        window.addEventListener('keydown', onEscPress);
+        instance.element().querySelector('img').onclick = instance.close;
+      },
+      onClose: (instance) => {
+        window.removeEventListener('keydown', onEscPress);
+      },
+    }
+  );
+
+  function onEscPress(event) {
+    if (event.code === 'Escape') {
+      instance.close();
+    }
+  }
+
+  instance.show();
 }
